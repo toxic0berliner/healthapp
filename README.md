@@ -37,5 +37,6 @@ Progressive Web app based on Polymer and Firabase that will fetch your data from
   * copy config.sample.json and name it config.json
   * edit config.json and fill the values.
   * run npm install
+  * import the file backend/database-init.json into your firebase database using the firebase web console
   * run npm start
 * finally, browse to your project's url !

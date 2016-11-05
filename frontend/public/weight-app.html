@@ -1,0 +1,273 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="/src/my-elements.html">
+<link rel="import" href="/bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
+<link rel="import" href="/bower_components/polymerfire/polymerfire.html">
+<link rel="import" href="/bower_components/iron-list/iron-list.html">
+
+<dom-module id="weight-app">
+  <template>
+    <style include="weight-app-shared-styles"></style>
+
+    <na-toolbar
+        signed-in="[[signedIn]]"
+        chart-view="[[chartView]]"
+        on-sign-out="signOut">
+    </na-toolbar>
+
+
+
+    <firebase-auth
+        id="auth"
+        app-name="weight"
+        provider="google"
+        signed-in="{{signedIn}}"
+        user="{{user}}"
+        on-login="onFirebaseLogin">
+    </firebase-auth>
+
+    <firebase-query
+        id="query"
+        app-name="weight"
+        path="/measures/[[user.uid]]"
+        data="{{data}}"
+        order-by-child="date"
+        limit-to-last="[[limitMeasures]]">
+    </firebase-query>
+
+    <app-indexeddb-mirror
+        session="[[user.uid]]"
+        key="measures"
+        data="{{data}}"
+        persisted-data="{{persistedData}}">
+    </app-indexeddb-mirror>
+
+    <div class="notes">
+      <template id="notes" is="dom-repeat" items="[[persistedDataReverse]]" as="note">
+        <na-note
+            id="[[note.$key]]"
+            date="[[note.date]]"
+            weight="[[note.weight]]"
+			      fatmass="[[note.fatmass]]"
+            watermass="[[note.watermass]]"
+            on-tap="editme"
+            myid="[[note.$key]]"
+            name="mymeasurelist"
+            measure="[[note]]">
+        </na-note>
+      </template>
+    </div>
+
+    <na-chart id="chartOverlay" disabled="[[chartView]]" data="[[persistedData]]"> </na-chart>
+    <na-login
+        on-sign-in="signIn"
+        signed-in="[[signedIn]]"
+        disabled="[[!online]]">
+    </na-login>
+    <paper-fab icon="add" disabled="[[!online]]" on-tap="create"></paper-fab>
+
+    <firebase-document
+        id="userProfile"
+        app-name="weight"
+        path="/users/[[user.uid]]"
+        data="{{userProfile}}"
+        zero-value="[[userProfileZeroValue]]"
+        >
+    </firebase-document>
+
+    <firebase-document
+        id="document"
+        app-name="weight"
+        path="[[editableNoteId]]"
+        data="{{editableNote}}"
+        >
+    </firebase-document>
+
+    <na-editor
+        id="editor"
+        note="{{editableNote}}"
+        on-close="commitChange">
+    </na-editor>
+
+    <my-importer
+        id="importer"
+        >
+    </my-importer>
+
+    <withings-auth
+        id="withingsAuth"
+        >
+    </withings-auth>
+
+  </template>
+  <script>
+    (() => {
+      'use strict';
+
+      Polymer({
+        is: 'weight-app',
+
+        properties: {
+          listView: {
+            type: Boolean,
+            reflectToAttribute: true,
+            value: true
+          },
+          chartView: {
+            type: Boolean,
+            reflectToAttribute: true,
+            value: false
+          },
+          persistedData: {
+            type: Object,
+            reflectToAttribute: true,
+            value: false
+          },
+          persistedDataReverse: {
+            type: Object,
+            reflectToAttribute: true,
+            notify: true,
+            value: false
+          },
+          limitMeasures: {
+            type: Number,
+            reflectToAttribute: true,
+            notify: true,
+            value: 20
+          },
+          userProfile: {
+            type: Object,
+            reflectToAttribute: true,
+            notify: true,
+            value: ''
+          },
+          userProfileTransactions: {
+            type: Number,
+            reflectToAttribute: true,
+            notify: true,
+            value: 0
+          },
+        },
+
+        listeners: {
+          'change-view': 'changeView',
+          'toggle-ignored': 'toggleIgnored',
+          'import': 'openImport',
+          'chart-rendered': 'chartRendered',
+          'new-user': 'newUser',
+        },
+        observers: [
+             'dataChanged(persistedData.splices)',
+             'userProfileChanged(userProfile)'
+        ],
+
+        behaviors: [
+          Polymer.NoteAppBehavior
+        ],
+
+        userProfileZeroValue: function(){
+          console.log("i'm beeing called !!!")
+          return null;
+        },
+
+        get isEditable() {
+          return this.online;
+        },
+
+        get notesPath() {
+          return `/measures/${this.user.uid}`;
+        },
+
+        toEditableId(noteId) {
+          return `${this.notesPath}/${noteId}`;
+        },
+
+        signIn() {
+          this.$.auth.signInWithPopup();
+        },
+
+        onFirebaseLogin(event) {
+          console.log("logged in with :")
+          console.log(event)
+        },
+
+        changeView() {
+          //console.log("changeView")
+          if (this.chartView) {
+            this.chartView=false;
+          } else {
+            this.chartView=true;
+          }
+        },
+
+        userProfileChanged: function( newValue, oldValue) {
+          this.$.userProfile.transactionsComplete.then(() => {
+            this.userProfileTransactions+=1;
+            if (this.userProfileTransactions>=3) {
+              if (Object.keys(this.userProfile).length === 0) {
+                this.fire('new-user')
+              }
+            }
+          });
+
+        },
+
+        editNoteById: function (k) { // @TODO delete this method since it's unused
+          this.editableNoteId= `/measures/${this.user.uid}/`+k
+
+          this.$.document.transactionsComplete.then(() => {
+            setTimeout( function () {
+              this.$.editor.openme(this.$.document.ref.key);
+            }.bind(this), 10);
+          });
+        },
+
+        editme(event) {
+            this.editNoteById(event.model.get('note').$key)
+        },
+
+        dataChanged: function(newValue, oldValue) {
+          //console.log("data changed in app")
+          //console.log(JSON.stringify(this.data));
+          if (this.persistedData && this.persistedData.length > 0) {
+            clearTimeout(window.dataReverseTimer);
+            window.dataReverseTimer = setTimeout( function () {
+              this._dataChanged();
+            }.bind(this), 10);
+          }
+        },
+
+        _dataChanged: function() {
+          console.log("reversing data")
+          this.persistedDataReverse = []
+          this.persistedDataReverse = this.persistedData.sort(function(a,b){return b.sortup-a.sortup})
+        },
+
+        toggleIgnored() {
+          this.$.chartOverlay.toggleIgnored()
+        },
+
+        chartRendered() {
+          this.set('limitMeasures',0);
+        },
+
+        newUser() {
+          console.log("CREATING A USER !!!!!!!!!!!!")
+          this.$.withingsAuth.open()
+        },
+
+        openImport() {
+          this.$.importer.open()
+        },
+      });
+    })();
+  </script>
+</dom-module>

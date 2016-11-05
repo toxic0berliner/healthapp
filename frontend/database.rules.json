@@ -1,0 +1,22 @@
+{
+  "rules": {
+    ".read": "auth != null",
+    ".write": "auth != null",
+    "queue": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      "tasks": {
+        ".indexOn": "_state",
+        ".read": "auth != null",
+        ".write": "auth != null"
+      }
+    },
+    "measures": {
+      "$uid": {
+        "$measure": {
+          ".indexOn": "date"
+        }
+      }
+    }
+  }
+}

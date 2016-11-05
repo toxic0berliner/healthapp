@@ -1,0 +1,212 @@
+<link rel="import" href="/bower_components/paper-styles/shadow.html">
+<link rel="import" href="/bower_components/paper-styles/typography.html">
+<dom-module id="na-note">
+  <template>
+    <style>
+      :host {
+        display: block;
+        box-sizing: border-box;
+        background-color: #fafafa;
+        color: #212121;
+        padding: 1em;
+        @apply(--paper-font-common-base);
+        @apply(--shadow-elevation-2dp);
+        border-radius: 2px;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      h1 {
+        font-size: 1.15em;
+        margin: 0;
+        white-space: pre-wrap;
+      }
+
+      h1:not(.hidden)+p {
+        margin-top: 1em;
+      }
+
+      p {
+        margin: 0;
+        font-family: 'Roboto Slab', Times New Roman, serif;
+        font-size: 0.9em;
+        //white-space: pre-wrap;
+      }
+
+      .placeholder:after {
+        content: 'Tap to edit';
+        opacity: 0.5;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .empty {
+        font-style: italic;
+        color: #737373;
+        line-height: 0;
+        pointer-events: none;
+      }
+
+      .line {
+        display: inline-block;
+      }
+      .value {
+        font-weight: bold;
+      }
+    </style>
+    <h1 id="date">
+      {{date}}
+    </h1>
+    <template is="dom-if" if="[[measure.weight]]">
+      <p><span id="weight" class="value">{{measure.weight}}</span> kg Weight</p>
+    </template>
+    <template is="dom-if" if="[[measure.ignored_weight]]">
+      <p><span id="weight" class="value">{{measure.ignored_weight}}</span> kg Weight (Ignored)</p>
+    </template>
+    <template is="dom-if" if="[[measure.fatmass]]">
+      <p><span id="weight" class="value">{{measure.fatmass}}</span> kg Fat</p>
+    </template>
+    <template is="dom-if" if="[[measure.ignored_fatmass]]">
+      <p><span id="weight" class="value">{{measure.ignored_fatmass}}</span> kg Fat (Ignored)</p>
+    </template>
+    <template is="dom-if" if="[[measure.musclemass]]">
+      <p><span id="weight" class="value">{{measure.musclemass}}</span> kg Muscle</p>
+    </template>
+    <template is="dom-if" if="[[measure.ignored_musclemass]]">
+      <p><span id="weight" class="value">{{measure.ignored_musclemass}}</span> kg Muscle (Ignored)</p>
+    </template>
+    <template is="dom-if" if="[[measure.watermass]]">
+      <p><span id="weight" class="value">{{measure.watermass}}</span> kg Water</p>
+    </template>
+    <template is="dom-if" if="[[measure.ignored_watermass]]">
+      <p><span id="weight" class="value">{{measure.ignored_watermass}}</span> kg Water (Ignored)</p>
+    </template>
+    <template is="dom-if" if="[[measure.bonemass]]">
+      <p><span id="weight" class="value">{{measure.bonemass}}</span> kg Bone</p>
+    </template>
+    <template is="dom-if" if="[[measure.ignored_bonemass]]">
+      <p><span id="weight" class="value">{{measure.ignored_bonemass}}</span> kg Bone (Ignored)</p>
+    </template>
+  </template>
+  <script>
+    Polymer({
+      is: 'na-note',
+
+      properties: {
+        editable: {
+          type: Boolean,
+          reflectToAttribute: true,
+          value: false
+        },
+
+        date: {
+          type: Date,
+          notify: true,
+          value: ''
+        },
+
+        weight: {
+          type: Number,
+          notify: true,
+          value: ''
+        },
+    		fatmass: {
+          type: Number,
+          notify: true,
+          value: ''
+        },
+        watermass: {
+          type: Number,
+          notify: true,
+          value: ''
+        },
+        ignoreweight: {
+          type: Boolean,
+          notify: true,
+          value: false
+        },
+        ignoredweight: {
+          type: Number,
+          notify: true,
+          value: ''
+        },
+
+        lastUpdated: {
+          type: Number,
+          value: 0
+        },
+
+        measure: {
+          type: Object,
+          notify: true,
+          reflectToAttribute: true
+        }
+      },
+
+      listeners: {
+        input: 'onInput'
+      },
+
+      observers: [
+        'updateTextContent(source, weight, fatmass)'
+      ],
+
+      /*attached: function() {
+        console.log("element note attached :")
+        console.log(this.id)
+        console.log(this.date)
+        console.log(this.weight)
+        console.log(this.fatmass)
+      },*/
+
+      emptyClass(content, editable) {
+        if (editable) {
+          return !content ? 'placeholder' : '';
+        } else {
+          return !content ? 'hidden' : '';
+        }
+      },
+
+      propertiesAreEmpty() {
+    	  console.log("checking if properties are empty : ");
+    	  console.info(arguments);
+        for (var i = 0; i < arguments.length; ++i) {
+          if (arguments[i]) {
+            return false;
+          }
+        }
+        return true;
+      },
+
+      updateTextContent(date, weight, fatmass, watermass) {
+        console.log(arguments);
+        this.$.date.textContent = date;
+        this.$.weight.textContent = weight;
+    		this.$.fatmass.textContent = fatmass;
+        this.$.watermass.textContent = watermass;
+      },
+
+      onInput() {
+        this.async(function() {
+          // console.log("onInput with:")
+          // console.info(this)
+          // console.info(this.$)
+          // console.info(this.$.date)
+          // console.info(this.$.ignore_weight)
+          // console.info(this.$.ignoreweight)
+          // console.info(this.ignore_weight)
+          // console.info(this.ignoreweight)
+
+          this.date = this.$.date.innerText;
+          this.weight = this.$.weight.innerText;
+		      this.fatmass = this.$.fatmass.innerText;
+          this.watermass = this.$.watermass.innerText;
+        });
+      }
+    })
+  </script>
+</dom-module>

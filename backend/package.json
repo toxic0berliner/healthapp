@@ -1,0 +1,23 @@
+{
+  "name": "healthapp-backend",
+  "description": "Backend for healthapp",
+  "version": "0.0.1",
+  "private": true,
+  "license": "Apache Version 2.0",
+  "author": "ToXiC",
+  "engines": {
+    "node": "~6.9"
+  },
+  "scripts": {
+    "start": "node app.js",
+    "monitor": "nodemon app.js",
+    "deploy": "gcloud app deploy"
+  },
+  "dependencies": {
+    "express": "^4.14.0",
+    "firebase":"~3.5.1",
+    "firebase-queue" :"~1.5.0",
+    "withings-oauth2":"~0.0.9",
+    "body-parser":"~1.15.2"
+  }
+}

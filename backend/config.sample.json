@@ -1,0 +1,22 @@
+{
+
+"database_url": "https://yourproject.firebaseio.com/",
+"withings_apikey": "get-it-from-withings",
+"withings_apisecret": "get-it-from-withings",
+"service_account": {
+    "type": "service_account",
+    "project_id": "your-project",
+    "private_key_id": "get-it-from-google",
+    "private_key": "-----BEGIN PRIVATE KEY-----\nget-if-from-google\n-----END PRIVATE KEY-----\n",
+    "client_email": "get-it-from-google",
+    "client_id": "get-it-from-google",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://accounts.google.com/o/oauth2/token",
+    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+    "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/get-it-from-google.iam.gserviceaccount.com"
+  },
+"withings_callback_url": "https://your-node-server/callback",
+"withings_notification_comment": "firebase-queue-for-withings-by-toxic",
+"withings_notification_callback": "https://your-node-server/notification",
+"application_callback_url":"https://your-frontend-url/"
+}

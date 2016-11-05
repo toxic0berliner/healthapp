@@ -1,0 +1,281 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="/bower_components/paper-styles/color.html">
+<link rel="import" href="/bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="/bower_components/paper-button/paper-button.html">
+<dom-module id="na-editor">
+  <template>
+    <style>
+      :host {
+        display: none;
+        position: absolute;
+        overflow: hidden;
+        top: 46px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1;
+      }
+
+      :host([opened]) {
+        display: block;
+      }
+
+      :host(.open) {
+        background-color: var(--paper-purple-500);
+      }
+
+      paper-button {
+        color: var(--paper-purple-50);
+      }
+
+      #background {
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        border-radius: 512px;
+        width: 256px;
+        height: 256px;
+        background-color: var(--paper-purple-500);
+        transform-origin: 128px 128px;
+      }
+
+      na-note {
+        display: block;
+        position: absolute;
+        top: 0px;
+        left: 0px;
+      }
+
+      :host(.open) na-note {
+        position: relative;
+        margin: auto;
+        width: calc(100vw - 20px);
+        max-width: 480px;
+      }
+
+      .controls {
+        display: block;
+        position: relative;
+        margin: 10px auto;
+        width: calc(100vw - 20px);
+        max-width: 480px;
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        justify-content: space-between;
+        transition: opacity 0.3s;
+        opacity: 0;
+      }
+
+      :host(.open) .controls {
+        opacity: 1;
+      }
+    </style>
+    <div id="background"></div>
+    <na-note id="note" date="{{note.date}}" weight="{{note.weight}}" fatmass="{{note.fatmass}}" watermass="{{note.watermass}}" ignoreweight="{{note.ignore_weight}}" ignoredweight="{{note.ignored_weight}}" measure="{{note}}" editable></na-note>
+    <div class="controls">
+      <paper-button on-tap="delete">Delete</paper-button>
+      <paper-button on-tap="ignore_weight" hidden="[[note.ignore_weight]]">Ignore Weight</paper-button>
+      <paper-button on-tap="unignore_weight" hidden="[[!note.ignore_weight]]">Un-Ignore Weight</paper-button>
+      <paper-button on-tap="ignore_partialmasses" hidden="[[ignorepartialmasses]]">Ignore Partial Masses</paper-button>
+      <paper-button on-tap="unignore_partialmasses" hidden="[[!ignorepartialmasses]]">Un-Ignore Partial Masses</paper-button>
+      <paper-button on-tap="save">Done</paper-button>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'na-editor',
+
+      properties: {
+        note: {
+          type: Object,
+          notify: true,
+          reflectToAttribute: true
+        },
+
+        opened: {
+          type: Boolean,
+          reflectToAttribute: true,
+          readOnly: true,
+          value: false
+        },
+      },
+
+      open(noteElement) {
+        console.log("opening editor with:")
+        console.log(noteElement)
+        window.debug2 = noteElement
+        this._setOpened(true);
+        this.__editedNoteElement = noteElement;
+        if (noteElement) {
+          noteElement.style.opacity = 0;
+          this.transitionInFrom(noteElement.getBoundingClientRect());
+        } else {
+          this.create();
+        }
+        this.ignorepartialmasses=this.computeIgnorePartialMasses();
+      },
+
+
+      openme(key) {
+        console.log("opening (me) editor with:")
+        console.log(key)
+        this._setOpened(true);
+        //var bogusEntry = this.parentElement.
+        window.debugme=this
+        this.transitionInFrom(this.parentElement.$.chartOverlay.getBoundingClientRect());
+        this.ignorepartialmasses=this.computeIgnorePartialMasses();
+      },
+
+      ignore_prop: function(prop) {
+        //console.log("ignoring "+prop)
+        this.parentElement.$.document.data["ignore_"+prop]=true;
+        this.parentElement.$.document.data["ignored_"+prop+"mass"]=this.parentElement.$.document.data[prop+"mass"]
+        this.parentElement.$.document.data[prop+"mass"]=null
+        this.parentElement.$.document.data["ignored_"+prop+"ratio"]=this.parentElement.$.document.data[prop+"ratio"]
+        this.parentElement.$.document.data[prop+"ratio"]=null
+      },
+
+      unignore_prop: function(prop) {
+        //console.log("ignoring "+prop)
+        this.parentElement.$.document.data["ignore_"+prop]=false;
+        this.parentElement.$.document.data[prop+"mass"]=this.parentElement.$.document.data["ignored_"+prop+"mass"]
+        this.parentElement.$.document.data["ignored_"+prop+"mass"]=null
+        this.parentElement.$.document.data[prop+"ratio"]=this.parentElement.$.document.data["ignored_"+prop+"ratio"]
+        this.parentElement.$.document.data["ignored_"+prop+"ratio"]=null
+      },
+
+      saveAndClose: function() {
+        this.parentElement.$.document.save(this.parentElement.notesPath,this.parentElement.$.document.ref.key)
+        this.parentElement.$.chartOverlay.buildChart();
+        this.close('save');
+      },
+
+
+      ignore_weight: function() {
+        this.parentElement.$.document.data.ignore_weight=true;
+        this.parentElement.$.document.data.ignored_weight=this.note.weight
+        this.parentElement.$.document.data.weight=null
+        this.saveAndClose()
+      },
+      unignore_weight: function() {
+        this.parentElement.$.document.data.ignore_weight=false;
+        this.parentElement.$.document.data.weight=this.note.ignored_weight
+        this.parentElement.$.document.data.ignored_weight=null
+        this.saveAndClose()
+      },
+
+      ignore_partialmasses: function() {
+        var props=["fat","water","muscle","bone"]
+        props.forEach(function(prop){
+          this.ignore_prop(prop)
+        }.bind(this))
+        this.saveAndClose()
+      },
+
+      unignore_partialmasses: function() {
+        var props=["fat","water","muscle","bone"]
+        props.forEach(function(prop){
+          this.unignore_prop(prop)
+        }.bind(this))
+        this.saveAndClose()
+      },
+
+      computeIgnorePartialMasses: function() {
+        if (this.note) {
+          var r = true
+          r=(r && this.note.ignore_fat)
+          r=r && this.note.ignore_water
+          r=r && this.note.ignore_muscle
+          r=r && this.note.ignore_bone
+          return r
+        }
+        return true;
+      },
+
+      create() {
+        this._setOpened(true);
+        this.note = { date: '', weight: '', fatmass: '' };
+        this.transitionInFrom(this.getBoundingClientRect());
+      },
+
+      save() {
+        this.close('save');
+      },
+
+      delete() {
+        this.close('delete');
+      },
+
+      close(detail) {
+        if (this.__editedNoteElement) {
+          this.__editedNoteElement.style.opacity = 1;
+          this.__editedNoteElement = null;
+        }
+
+        this.fire('close', detail, { bubbles: false });
+        this.transitionOut().then(() => {
+          Polymer.dom(this).classList.remove('open');
+          this._setOpened(false);
+        });
+      },
+
+      transitionInFrom(rect) {
+        var targetRect = this.getBoundingClientRect();
+        var targetLeft = targetRect.width > 500 ?
+            targetRect.width / 2 - 240 : 10;
+        var targetWidth = targetRect.width > 500 ?
+            '480px' : 'calc(100vw - 20px)'
+        var noteAnimation = this.$.note.animate([{
+          transform: `translate(${rect.left}px,${rect.top - 46}px)`,
+          width: `${rect.width}px`,
+          easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
+        }, {
+          transform: `translate(${targetLeft}px, 0px)`,
+          width: targetWidth
+        }], 500);
+
+        var backgroundAnimation = this.$.background.animate([{
+          transform: `translate(${rect.left + rect.width / 2 - 128}px, ${rect.top - 46 + rect.height / 2 - 128}px) scale(0.1)`,
+          easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
+        }, {
+          transform: `scale(${targetRect.width / 256 * 4})`
+        }], 800);
+
+        noteAnimation.addEventListener('finish', () => {
+          Polymer.dom(this).classList.add('open');
+        });
+      },
+
+      transitionOut() {
+        var animation = this.animate([{
+          opacity: 1,
+          easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
+        }, {
+          opacity: 0
+        }], 300);
+
+        this.$.note.animate([{
+          transform: 'translateY(0) scale(1)',
+          opacity: 1,
+          easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
+        }, {
+          transform: 'translateY(10px) scale(0.9)',
+          opacity: 0
+        }], 500);
+
+        return new Promise(resolve => {
+          animation.addEventListener('finish', resolve);
+        });
+      }
+    });
+  </script>
+</dom-module>

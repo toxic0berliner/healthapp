@@ -1,0 +1,76 @@
+{
+  "queue" : {
+    "specs" : {
+      "compute_oauth_access_token" : {
+        "error_state" : "compute_oauth_access_token_error",
+        "finished_state" : "compute_oauth_access_token_finished",
+        "in_progress_state" : "compute_oauth_access_token_in_progress",
+        "start_state" : "user_callback_finished"
+      },
+      "compute_oauth_redirect" : {
+        "error_state" : "compute_oauth_redirect_failed",
+        "finished_state" : "compute_oauth_redirect_finished",
+        "in_progress_state" : "compute_auth_redirect_in_progress"
+      },
+      "create_withings_notification" : {
+        "error_state" : "create_withings_notification_error",
+        "in_progress_state" : "create_withings_notification_in_progress",
+        "start_state" : "revoke_withings_notifications_finished"
+      },
+      "fanout_oauth_access_token" : {
+        "finished_state" : "withings_notification_recieved",
+        "in_progress_state" : "fanout_oauth_access_token_in_progress",
+        "retries" : 3,
+        "start_state" : "compute_oauth_access_token_finished"
+      },
+      "fanout_oauth_redirect" : {
+        "finished_state" : "waiting_for_user_callback",
+        "in_progress_state" : "fanout_oauth_redirect_in_progress",
+        "retries" : 3,
+        "start_state" : "compute_oauth_redirect_finished"
+      },
+      "fanout_withings_measures" : {
+        "error_state" : "fanout_withings_measures_error",
+        "finished_state" : "fanout_withings_measures_finished",
+        "in_progress_state" : "fanout_withings_measures_in_progress",
+        "start_state" : "sanitize_withings_measures_finished"
+      },
+      "format_measures" : {
+        "error_state" : "format_measures_error",
+        "finished_state" : "format_measures_finished",
+        "in_progress_state" : "format_measures_in_progress",
+        "start_state" : "fanout_withings_measures_finished"
+      },
+      "get_measures" : {
+        "error_state" : "get_measures_error",
+        "finished_state" : "get_measures_finished",
+        "in_progress_state" : "get_measures_in_progress",
+        "start_state" : "get_measures"
+      },
+      "get_notifications" : {
+        "error_state" : "get_notifications_error",
+        "finished_state" : "get_notifications_finished",
+        "in_progress_state" : "get_notifications_in_progress",
+        "start_state" : "format_measures_finished"
+      },
+      "populate_notification" : {
+        "error_state" : "populate_notification_error",
+        "finished_state" : "get_measures",
+        "in_progress_state" : "populate_notification_in_progress",
+        "start_state" : "withings_notification_recieved"
+      },
+      "revoke_withings_notifications" : {
+        "error_state" : "revoke_withings_notifications_error",
+        "finished_state" : "revoke_withings_notifications_finished",
+        "in_progress_state" : "revoke_withings_notifications_in_progress",
+        "start_state" : "get_notifications_finished"
+      },
+      "sanitize_withings_measures" : {
+        "error_state" : "sanitize_withings_measures_error",
+        "finished_state" : "sanitize_withings_measures_finished",
+        "in_progress_state" : "sanitize_withings_measures_in_progress",
+        "start_state" : "get_measures_finished"
+      }
+    }
+  }
+}

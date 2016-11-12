@@ -116,11 +116,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         is: 'weight-app',
 
         properties: {
-          listView: {
-            type: Boolean,
-            reflectToAttribute: true,
-            value: true
-          },
           chartView: {
             type: Boolean,
             reflectToAttribute: true,
@@ -128,19 +123,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           },
           persistedData: {
             type: Object,
-            reflectToAttribute: true,
             value: false
           },
           persistedDataReverse: {
             type: Object,
             reflectToAttribute: true,
-            notify: true,
             value: false
           },
           limitMeasures: {
             type: Number,
             reflectToAttribute: true,
-            notify: true,
             value: 20
           },
           userProfile: {

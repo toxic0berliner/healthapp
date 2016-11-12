@@ -136,6 +136,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this._setOpened(true);
         this.transitionInFrom(this.parentElement.$.chartOverlay.getBoundingClientRect());
       },
+      
+      openFrom(elem) {
+        this._setOpened(true);
+        this.transitionInFrom(elem.getBoundingClientRect());
+      },
 
       save() {
         //@TODO : do the importing of stuff here !

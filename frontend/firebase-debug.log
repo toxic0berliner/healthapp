@@ -1,0 +1,14 @@
+[debug] ----------------------------------------------------------------------
+[debug] Command:      /usr/local/bin/node /usr/local/bin/firebase serve
+[debug] CLI Version:  3.0.8
+[debug] Platform:     linux
+[debug] Node Version: v6.8.1
+[debug] Time:         Sat Nov 12 2016 20:40:27 GMT+0100 (CET)
+[debug] ----------------------------------------------------------------------
+[debug] 
+[info] Starting Firebase development server...
+[info] 
+[info] Project Directory: /home/chronos/user/Downloads/Dev/healthapp/frontend
+[info] Public Directory: public
+[info] 
+[info] Server listening at: http://localhost:5000

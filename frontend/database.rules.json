@@ -15,7 +15,8 @@
       "$uid": {
         "$measure": {
           ".indexOn": "date"
-        }
+        },
+        ".indexOn": "date"
       }
     }
   }

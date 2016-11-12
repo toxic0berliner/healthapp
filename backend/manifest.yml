@@ -1,0 +1,4 @@
+applications:
+- name: healthapp-git-backend
+  memory: 256M
+  disk_quota: 256M

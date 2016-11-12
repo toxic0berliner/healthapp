@@ -470,7 +470,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             ],
         },
         "periodSelector": {
-          "position": "bottom",
+          "position": "none",
           "periods": [
             { "period": "WW", "count": 2, "label": "2 weeks"  , "selected": true},
             { "period": "MM", "count": 1, "label": "1 month"  },
@@ -557,6 +557,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             this.buildChart();
           }
         }
+      },
+      
+      zoomToPeriod: function(period){
+        window.chart.periodSelector.periods.forEach(function(item,index){
+          if (item.label==period) {
+            item.button.click()
+          }
+        })
       },
 
       signIn: function() {

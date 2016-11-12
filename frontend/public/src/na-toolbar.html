@@ -10,6 +10,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="/bower_components/polymer/polymer.html">
 <link rel="import" href="/bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="/bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="/bower_components/iron-dropdown/iron-dropdown.html">
 <link rel="import" href="/bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="/bower_components/app-storage/app-network-status-behavior.html">
 <dom-module id="na-toolbar">
@@ -35,6 +36,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       iron-icon {
         margin-right: 0.5em;
       }
+      
+        
+      iron-dropdown {
+        background-color:white;
+        color:black;
+        
+      }
+      
+      ul {
+        list-style-type:none;
+        padding-left:0;
+      }
 
       @media (min-width: 640px) {
         iron-icon,
@@ -47,23 +60,59 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       }
     </style>
-    <iron-icon icon="timeline"></iron-icon>
+    <iron-icon icon="timeline" id="logo"></iron-icon>
     <h1>Weight</h1>
     <paper-icon-button
-        icon="file-upload"
-        on-tap="import">
+        icon="menu"
+        on-tap="toggleMenu">
     </paper-icon-button>
-    <paper-icon-button
-        icon="fingerprint"
-        on-tap="toggleIgnored">
-    </paper-icon-button>
-    <paper-icon-button
-        icon="[[computeListGraphIcon(chartView)]]"
-        disabled="[[!signedIn]]"
-        on-tap="changeView">
-    </paper-icon-button>
-    <iron-icon icon="cloud" hidden$="[[!online]]"></iron-icon>
-    <iron-icon icon="cloud-off" hidden$="[[online]]"></iron-icon>
+    <iron-dropdown horizontal-align="right" vertical-align="top" id="menudropdown">
+      <div class="dropdown-content">
+        <ul>
+          <li on-tap="changeView">
+            <paper-icon-button icon="[[computeListGraphIcon(chartView)]]" disabled="[[!signedIn]]"></paper-icon-button>
+            Toggle graph-list view
+          </li>
+          <li on-tap="toggleIgnored">
+            <paper-icon-button icon="fingerprint"></paper-icon-button>
+            Toggle ignored values
+          </li>
+          <li on-tap="periodTwoWeeks">
+            <paper-icon-button icon="time"></paper-icon-button>
+            2 Weeks
+          </li>
+          <li on-tap="periodOneMonth">
+            <paper-icon-button icon="time"></paper-icon-button>
+            1 month
+          </li>
+          <li on-tap="periodThreeMonth">
+            <paper-icon-button icon="time"></paper-icon-button>
+            3 month
+          </li>
+          <li on-tap="periodSixMonth">
+            <paper-icon-button icon="time"></paper-icon-button>
+            6 month
+          </li>
+          <li on-tap="periodOneYear">
+            <paper-icon-button icon="time"></paper-icon-button>
+            1 year
+          </li>
+          <li on-tap="periodMax">
+            <paper-icon-button icon="time"></paper-icon-button>
+            Max (all data)
+          </li>
+          <li on-tap="import">
+            <paper-icon-button icon="file-upload"></paper-icon-button>
+            Import JSON
+          </li>
+        </ul>
+      </div>
+    </iron-dropdown>
+    
+    
+    
+<!--    <iron-icon icon="cloud" hidden$="[[!online]]"></iron-icon>
+    <iron-icon icon="cloud-off" hidden$="[[online]]"></iron-icon>-->
     <paper-icon-button
         icon="[[computeLockIcon(signedIn)]]"
         disabled="[[!signedIn]]"
@@ -110,14 +159,58 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       changeView: function() {
         this.fire('change-view');
+        this.closeMenu();
+      },
+      
+      toggleMenu: function() {
+        if (this.signedIn) {
+          this.$.menudropdown.toggle();
+        }
+      },
+      
+      closeMenu: function() {
+        this.$.menudropdown.close();
       },
 
       toggleIgnored: function() {
         this.fire('toggle-ignored');
+        this.closeMenu();
       },
       import: function() {
         this.fire('import');
+        this.closeMenu();
+      },
+      
+      periodTwoWeeks: function() {
+        this.fire('period-change','2 weeks');
+        this.closeMenu();
+      },
+      
+      periodOneMonth: function() {
+        this.fire('period-change','1 month');
+        this.closeMenu();
+      },
+      
+      periodThreeMonth: function() {
+        this.fire('period-change','3 months');
+        this.closeMenu();
+      },
+      
+      periodSixMonth: function() {
+        this.fire('period-change','6 months');
+        this.closeMenu();
+      },
+      
+      periodOneYear: function() {
+        this.fire('period-change','1 year');
+        this.closeMenu();
+      },
+      
+      periodMax: function() {
+        this.fire('period-change','MAX');
+        this.closeMenu();
       }
+      
     });
   </script>
 </dom-module>

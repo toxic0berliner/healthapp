@@ -20,7 +20,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <na-toolbar
         signed-in="[[signedIn]]"
         chart-view="[[chartView]]"
-        on-sign-out="signOut">
+        on-sign-out="signOut"
+        id="toolbar">
     </na-toolbar>
 
 
@@ -153,6 +154,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           'change-view': 'changeView',
           'toggle-ignored': 'toggleIgnored',
           'import': 'openImport',
+          'period-change': 'changeZoom',
           'chart-rendered': 'chartRendered',
           'new-user': 'newUser',
         },
@@ -259,6 +261,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         openImport() {
           this.$.importer.open()
         },
+        
+        changeZoom(event) {
+          this.$.chartOverlay.zoomToPeriod(event.detail);
+        }
       });
     })();
   </script>

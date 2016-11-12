@@ -352,6 +352,14 @@ function _formatMeasure (measure,prop) {
   return measure
 }
 
+function _formatMeasureTime(measure) {
+  if (measure.provider_data && measure.provider_data.epoch) {
+    measure.sortup=measure.provider_data.epoch*1000
+    measure.sortdown=9999999999999-measure.sortup
+  }
+  return measure
+}
+
 function formatMeasure (measure) {
   if (measure.ignore_weight) { // weight should be ignored
     measure.ignored_weight=measure.provider_data.weight;
@@ -369,6 +377,8 @@ function formatMeasure (measure) {
   properties.forEach(function(prop){
     measure = _formatMeasure(measure,prop)
   })
+  
+  measure = _formatMeasureTime(measure)
   return measure;
 }
 
